@@ -4,25 +4,25 @@ const UserSchema = new Schema(
   {
     firstName: {
       type: String,
-      require: true,
+      required: true,
       min: 2,
       max: 50,
     },
     lastName: {
       type: String,
-      require: true,
+      required: true,
       min: 2,
       max: 50,
     },
     email: {
       type: String,
-      require: true,
+      required: true,
       max: 50,
       unique: true,
     },
     password: {
       type: String,
-      require: true,
+      required: true,
       min: 6,
     },
     picturePath: {
@@ -40,5 +40,6 @@ const UserSchema = new Schema(
   },
   { timestamps: true }
 );
+
 const User = model("User", UserSchema);
 export default User;

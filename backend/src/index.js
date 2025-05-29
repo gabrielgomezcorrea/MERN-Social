@@ -8,6 +8,10 @@ import helmet from "helmet";
 import morgan from "morgan";
 import path from "path";
 import { fileURLToPath } from "url";
+import { verifyToken } from "../middlewares/auth.js";
+import { users, posts } from "../data/index.js";
+import User from "./models/User.js";
+import Post from "./models/Post.js";
 
 // Config
 dotenv.config();
@@ -29,7 +33,18 @@ app.use("/assets", express.static(path.join(__dirname, "public/assets")));
 // DB
 mongoose
   .connect(process.env.MONGO_DB_URI)
-  .then(() => console.log("✅ MongoDB connected"))
+  .then(() => {
+    console.log("✅ MongoDB connected\n");
+
+    /* console.log("🌱 Seeding the database ...\n");
+    Promise.all([User.insertMany(users), Post.insertMany(posts)])
+      .then(() => {
+        console.log("✅ Seed success");
+      })
+      .catch((seedErr) => {
+        console.error("❌ Seed error:", seedErr.message);
+      }); */
+  })
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
 const storage = multer.diskStorage({
@@ -42,10 +57,17 @@ const upload = multer({ storage });
 import { register } from "./controllers/auth.js";
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
+import { createPost } from "./controllers/posts.js";
+import postRoutes from "./routes/posts.js";
 
+// With files
 app.post("/api/auth/register", [upload.single("picture")], register);
+app.post("/api/posts", [verifyToken], createPost);
+
+// Api Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/posts", postRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
@@ -53,7 +75,7 @@ app.use((req, res) => {
 
 // Server
 app.listen(port, () => {
-  console.log("==========================================");
+  console.log("\n==========================================");
   console.log(`🚀 Server running on http://localhost:${port}`);
-  console.log("==========================================");
+  console.log("==========================================\n");
 });
